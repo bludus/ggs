@@ -1,0 +1,50 @@
+-- Put this script in a part (e.g., StarterPack)
+
+local player = game.Players.LocalPlayer
+local character = player.Character
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+local flying = false
+
+local function fly()
+    if not flying then
+        flying = true
+        local bodyPosition = Instance.new("BodyPosition")
+        bodyPosition.MaxForce = Vector3.new(400000, 400000, 400000)
+        bodyPosition.D = 1000
+        bodyPosition.P = 10000
+        bodyPosition.Parent = humanoidRootPart
+
+        local bodyGyro = Instance.new("BodyGyro")
+        bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+        bodyGyro.Parent = humanoidRootPart
+
+        while flying do
+            local camera = game.Workspace.CurrentCamera
+            local forwardVector = camera.CFrame.lookVector
+            local rightVector = camera.CFrame.rightVector
+
+            local moveDirection = (forwardVector + rightVector).unit
+            bodyPosition.Position = humanoidRootPart.Position + moveDirection * 10
+            bodyGyro.CFrame = CFrame.new(humanoidRootPart.Position, humanoidRootPart.Position + forwardVector)
+            wait(0.03)
+        end
+
+        bodyPosition:Destroy()
+        bodyGyro:Destroy()
+    end
+end
+
+local function stopFlying()
+    flying = false
+end
+
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Space then
+        if flying then
+            stopFlying()
+        else
+            fly()
+        end
+    end
+end)
